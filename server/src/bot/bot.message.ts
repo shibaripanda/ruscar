@@ -33,7 +33,7 @@ export class BotMessage {
     media?: MediaItem[],
   ) {
     try {
-      const options: ExtraReplyMessage = {};
+      const options: ExtraReplyMessage = { parse_mode: 'HTML' };
       if (keyboard?.length) {
         options.reply_markup = { inline_keyboard: keyboard };
       }
@@ -46,7 +46,7 @@ export class BotMessage {
           await this.sendMediaGroup(user.tId, media, text);
           // клавиатура после альбома
           if (keyboard?.length) {
-            await this.bot.telegram.sendMessage(user.tId, ' ', options);
+            await this.bot.telegram.sendMessage(user.tId, '-----', options);
           }
         }
         return;
@@ -60,7 +60,7 @@ export class BotMessage {
 
       // 3) Только клавиатура
       if (keyboard?.length) {
-        await this.bot.telegram.sendMessage(user.tId, ' ', options);
+        await this.bot.telegram.sendMessage(user.tId, '-----', options);
         return;
       }
 
@@ -82,7 +82,7 @@ export class BotMessage {
 
     switch (type) {
       case 'photo': {
-        const options: ExtraPhoto = {};
+        const options: ExtraPhoto = { parse_mode: 'HTML' };
         if (keyboard?.length)
           options.reply_markup = { inline_keyboard: keyboard };
         await this.bot.telegram.sendPhoto(chatId, item.file_id, {
@@ -92,7 +92,7 @@ export class BotMessage {
         break;
       }
       case 'video': {
-        const options: ExtraVideo = {};
+        const options: ExtraVideo = { parse_mode: 'HTML' };
         if (keyboard?.length)
           options.reply_markup = { inline_keyboard: keyboard };
         await this.bot.telegram.sendVideo(chatId, item.file_id, {
@@ -102,7 +102,7 @@ export class BotMessage {
         break;
       }
       case 'animation': {
-        const options: ExtraAnimation = {};
+        const options: ExtraAnimation = { parse_mode: 'HTML' };
         if (keyboard?.length)
           options.reply_markup = { inline_keyboard: keyboard };
         await this.bot.telegram.sendAnimation(chatId, item.file_id, {
@@ -113,7 +113,7 @@ export class BotMessage {
       }
       case 'document':
       default: {
-        const options: ExtraDocument = {};
+        const options: ExtraDocument = { parse_mode: 'HTML' };
         if (keyboard?.length)
           options.reply_markup = { inline_keyboard: keyboard };
         await this.bot.telegram.sendDocument(chatId, item.file_id, {

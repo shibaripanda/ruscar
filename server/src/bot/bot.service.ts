@@ -11,13 +11,7 @@ export class BotService {
 
   async start(user: UserDocument, app: AppDocument) {
     const text = 'Добавить';
-    const keyboard = [
-      [
-        { text: 'Hello', callback_data: 'sdsdsdsd' },
-        { text: 'Hello', callback_data: 'sdsdsdsd' },
-      ],
-      [{ text: 'Добавить авто', callback_data: 'addNewCar' }],
-    ];
+    const keyboard = [[{ text: 'Добавить авто', callback_data: 'test' }]];
     const media = [];
     await this.botMessage.sendMessageToUser(user, app, text, keyboard, media);
   }

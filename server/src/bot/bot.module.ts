@@ -7,8 +7,9 @@ import { UserModule } from 'src/user/user.module';
 import { BotMessage } from './bot.message';
 import { BotService } from './bot.service';
 import { BotGateway } from './bot.gateway';
-import { ScenesModule } from 'src/scenes-module/scenes-module.module';
 import { session } from 'telegraf';
+import { AddNewCarScene } from './scenes/addNewCar.scene';
+import { Test } from './scenes/test.scene';
 
 @Global()
 @Module({
@@ -30,9 +31,8 @@ import { session } from 'telegraf';
         ],
       }),
     }),
-    ScenesModule,
   ],
-  providers: [BotMessage, BotService, BotGateway],
+  providers: [BotMessage, BotService, BotGateway, AddNewCarScene, Test],
   exports: [],
 })
 export class BotModule {}

@@ -20,6 +20,19 @@ export class BotGateway {
     console.log('BotGateway initialized');
   }
 
+  // @Action('leaveScene')
+  // async leaveScene(@Ctx() ctx: MyWizardContext) {
+  //   await ctx.scene.leave();
+  //   await this.botService.start(ctx.user, ctx.app);
+  //   await ctx.answerCbQuery();
+  // }
+
+  @Action('test')
+  async wizardTest(@Ctx() ctx: MyWizardContext) {
+    await ctx.scene.enter('test');
+    await ctx.answerCbQuery();
+  }
+
   @Action('addNewCar')
   async wizard(@Ctx() ctx: MyWizardContext) {
     await ctx.scene.enter('addNewCar');
