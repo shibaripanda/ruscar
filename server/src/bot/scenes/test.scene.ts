@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Wizard, WizardStep, Ctx } from 'nestjs-telegraf';
 import { Context, Scenes } from 'telegraf';
-import { BotMessage } from '../bot.message';
+import { BotMessage, MediaItem } from '../bot.message';
 import { UserDocument } from 'src/user/user.schema';
 import { AppDocument } from 'src/app/app.schema';
 
@@ -15,7 +15,7 @@ export interface AddCarWizardState extends Scenes.WizardSessionData {
   model?: string;
   age?: string;
   info?: string;
-  media?: { file_id: string }[];
+  media?: MediaItem[];
 }
 
 export interface MyWizardContext
@@ -29,11 +29,6 @@ export interface MyWizardContext
 @Wizard('test')
 export class Test {
   constructor(private botMessage: BotMessage) {}
-
-  private mediaGroups = new Map<
-    string,
-    { timeout?: NodeJS.Timeout; files: { file_id: string }[] }
-  >();
 
   private data = ['marka', 'model', 'age', 'info', 'media'];
   private wizLength = this.data.length;
@@ -85,12 +80,17 @@ export class Test {
       return true;
     }
 
-    let file_id = '';
+    const mediaItem: MediaItem = {
+      file_id: '',
+      type: 'photo',
+    };
     if (ctx.message && 'photo' in ctx.message) {
       const photos = ctx.message.photo;
-      file_id = photos[photos.length - 1].file_id;
+      mediaItem.file_id = photos[photos.length - 1].file_id;
+      mediaItem.type = 'photo';
     } else if (ctx.message && 'video' in ctx.message) {
-      file_id = ctx.message.video.file_id;
+      mediaItem.file_id = ctx.message.video.file_id;
+      mediaItem.type = 'video';
     }
 
     // Если это альбом
@@ -99,7 +99,8 @@ export class Test {
       if (!Array.isArray(ctx.scene.state[field])) {
         ctx.scene.state[field] = [];
       }
-      ctx.scene.state[field].push({ file_id });
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      ctx.scene.state[field].push(mediaItem);
       // }, 400);
       return false;
     }
@@ -107,7 +108,8 @@ export class Test {
     if (!Array.isArray(ctx.scene.state[field])) {
       ctx.scene.state[field] = [];
     }
-    ctx.scene.state[field].push({ file_id });
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    ctx.scene.state[field].push(mediaItem);
 
     return false;
   }
@@ -127,22 +129,19 @@ export class Test {
   @WizardStep(1)
   async step1(@Ctx() ctx: MyWizardContext) {
     const data = existData(ctx.scene.state[this.data[ctx.wizard.cursor]]);
-
     const text = `<b>Марка авто</b> (${ctx.wizard.cursor + 1}/${this.wizLength})\nПример: Geely${data}`;
-
     const keyboard = [[{ text: 'Отмена', callback_data: 'leaveScene' }]];
-
     if (data) {
       keyboard[0].push({ text: 'Ok', callback_data: 'nextStep' });
     }
-
-    const media =
+    const media: MediaItem[] =
       'media' in ctx.scene.state
-        ? (ctx.scene.state['media'] as { file_id: string }[])
+        ? (ctx.scene.state['media'] as MediaItem[])
         : [
             {
               file_id:
                 'AgACAgIAAxkBAAK1SmjAhdehbvgnkVgQscmk9cROkQiMAAJ8_TEbN8oBSur3tCOPliiGAQADAgADeQADNgQ',
+              type: 'photo',
             },
           ];
 
@@ -177,13 +176,14 @@ export class Test {
       keyboard[0].push({ text: 'Ok', callback_data: 'nextStep' });
     }
 
-    const media =
+    const media: MediaItem[] =
       'media' in ctx.scene.state
-        ? (ctx.scene.state['media'] as { file_id: string }[])
+        ? (ctx.scene.state['media'] as MediaItem[])
         : [
             {
               file_id:
                 'AgACAgIAAxkBAAK1SmjAhdehbvgnkVgQscmk9cROkQiMAAJ8_TEbN8oBSur3tCOPliiGAQADAgADeQADNgQ',
+              type: 'photo',
             },
           ];
 
@@ -218,13 +218,14 @@ export class Test {
       keyboard[0].push({ text: 'Ok', callback_data: 'nextStep' });
     }
 
-    const media =
+    const media: MediaItem[] =
       'media' in ctx.scene.state
-        ? (ctx.scene.state['media'] as { file_id: string }[])
+        ? (ctx.scene.state['media'] as MediaItem[])
         : [
             {
               file_id:
                 'AgACAgIAAxkBAAK1SmjAhdehbvgnkVgQscmk9cROkQiMAAJ8_TEbN8oBSur3tCOPliiGAQADAgADeQADNgQ',
+              type: 'photo',
             },
           ];
 
@@ -259,13 +260,14 @@ export class Test {
       keyboard[0].push({ text: 'Ok', callback_data: 'nextStep' });
     }
 
-    const media =
+    const media: MediaItem[] =
       'media' in ctx.scene.state
-        ? (ctx.scene.state['media'] as { file_id: string }[])
+        ? (ctx.scene.state['media'] as MediaItem[])
         : [
             {
               file_id:
                 'AgACAgIAAxkBAAK1SmjAhdehbvgnkVgQscmk9cROkQiMAAJ8_TEbN8oBSur3tCOPliiGAQADAgADeQADNgQ',
+              type: 'photo',
             },
           ];
 
@@ -300,12 +302,16 @@ export class Test {
       keyboard[0].push({ text: 'Ok', callback_data: 'nextStep' });
     }
 
-    const media = [
-      {
-        file_id:
-          'AgACAgIAAxkBAAK1SmjAhdehbvgnkVgQscmk9cROkQiMAAJ8_TEbN8oBSur3tCOPliiGAQADAgADeQADNgQ',
-      },
-    ];
+    const media: MediaItem[] =
+      'media' in ctx.scene.state
+        ? (ctx.scene.state['media'] as MediaItem[])
+        : [
+            {
+              file_id:
+                'AgACAgIAAxkBAAK1SmjAhdehbvgnkVgQscmk9cROkQiMAAJ8_TEbN8oBSur3tCOPliiGAQADAgADeQADNgQ',
+              type: 'photo',
+            },
+          ];
 
     await this.botMessage.sendMessageToUser(
       ctx.user,
@@ -333,13 +339,14 @@ export class Test {
       ],
     ];
 
-    const media =
+    const media: MediaItem[] =
       'media' in ctx.scene.state
-        ? (ctx.scene.state['media'] as { file_id: string }[])
+        ? (ctx.scene.state['media'] as MediaItem[])
         : [
             {
               file_id:
                 'AgACAgIAAxkBAAK1SmjAhdehbvgnkVgQscmk9cROkQiMAAJ8_TEbN8oBSur3tCOPliiGAQADAgADeQADNgQ',
+              type: 'photo',
             },
           ];
 
