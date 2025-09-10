@@ -9,6 +9,9 @@ export type settings = 'settings';
 export class App {
   @Prop({ required: true, unique: true })
   docName: settings;
+
+  @Prop()
+  placeholderImage: string;
 }
 
 export const AppSchema = SchemaFactory.createForClass(App);

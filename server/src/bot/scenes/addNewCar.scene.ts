@@ -53,100 +53,100 @@ export class AddNewCarScene {
     }
   }
 
-  @WizardStep(1)
-  async step1(@Ctx() ctx: MyWizardContext) {
-    if (ctx.callbackQuery && 'data' in ctx.callbackQuery) {
-      const data = ctx.callbackQuery.data;
+  // @WizardStep(1)
+  // async step1(@Ctx() ctx: MyWizardContext) {
+  //   if (ctx.callbackQuery && 'data' in ctx.callbackQuery) {
+  //     const data = ctx.callbackQuery.data;
 
-      if (data === 'leaveScene') {
-        await ctx.scene.leave();
-        await ctx.reply('Сцена закрыта');
-      }
-      if (data === 'nextStep') {
-        console.log('dddddddddddddd');
-        await this.goToStepNext(ctx);
-        return;
-      }
-    }
+  //     if (data === 'leaveScene') {
+  //       await ctx.scene.leave();
+  //       await ctx.reply('Сцена закрыта');
+  //     }
+  //     if (data === 'nextStep') {
+  //       console.log('dddddddddddddd');
+  //       await this.goToStepNext(ctx);
+  //       return;
+  //     }
+  //   }
 
-    // Если пользователь ввёл текст → сохраняем
-    if (ctx.message && 'text' in ctx.message) {
-      ctx.scene.state['marka'] = ctx.message.text;
-      // ctx.wizard.selectStep(1);
-      // ctx.wizard.next();
-      // await this.step2(ctx);
-      await this.goToStepNext(ctx);
-      return;
-    }
+  //   // Если пользователь ввёл текст → сохраняем
+  //   if (ctx.message && 'text' in ctx.message) {
+  //     ctx.scene.state['marka'] = ctx.message.text;
+  //     // ctx.wizard.selectStep(1);
+  //     // ctx.wizard.next();
+  //     // await this.step2(ctx);
+  //     await this.goToStepNext(ctx);
+  //     return;
+  //   }
 
-    // Формируем сообщение
-    const data = existData(ctx.scene.state['marka']);
-    const text = `<b>Марка авто</b>\nПример: Geely${data}`;
+  //   // Формируем сообщение
+  //   const data = existData(ctx.scene.state['marka']);
+  //   const text = `<b>Марка авто</b>\nПример: Geely${data}`;
 
-    const keyboard = [[{ text: 'Отмена', callback_data: 'leaveScene' }]];
-    if (data) {
-      keyboard[0].push({ text: 'Далее', callback_data: 'nextStep' });
-    }
+  //   const keyboard = [[{ text: 'Отмена', callback_data: 'leaveScene' }]];
+  //   if (data) {
+  //     keyboard[0].push({ text: 'Далее', callback_data: 'nextStep' });
+  //   }
 
-    await this.botMessage.sendMessageToUser(
-      ctx.user,
-      ctx.app,
-      text,
-      keyboard,
-      [],
-    );
-    // ctx.wizard.next();
-  }
+  //   await this.botMessage.sendMessageToUser(
+  //     ctx.user,
+  //     ctx.app,
+  //     text,
+  //     keyboard,
+  //     [],
+  //   );
+  //   // ctx.wizard.next();
+  // }
 
-  @WizardStep(2)
-  async step2(@Ctx() ctx: MyWizardContext) {
-    console.log('ffff', ctx.scene.state['marka']);
-    if (ctx.callbackQuery && 'data' in ctx.callbackQuery) {
-      const data = ctx.callbackQuery.data;
+  // @WizardStep(2)
+  // async step2(@Ctx() ctx: MyWizardContext) {
+  //   console.log('ffff', ctx.scene.state['marka']);
+  //   if (ctx.callbackQuery && 'data' in ctx.callbackQuery) {
+  //     const data = ctx.callbackQuery.data;
 
-      if (data === 'leaveScene') {
-        await ctx.scene.leave();
-        return;
-      }
-      if (data === 'backStep') {
-        await this.goToStepBack(ctx);
-        return;
-      }
-      if (data === 'nextStep') {
-        await this.goToStepNext(ctx);
-        return;
-      }
-    }
+  //     if (data === 'leaveScene') {
+  //       await ctx.scene.leave();
+  //       return;
+  //     }
+  //     if (data === 'backStep') {
+  //       await this.goToStepBack(ctx);
+  //       return;
+  //     }
+  //     if (data === 'nextStep') {
+  //       await this.goToStepNext(ctx);
+  //       return;
+  //     }
+  //   }
 
-    if (ctx.message && 'text' in ctx.message) {
-      ctx.scene.state['model'] = ctx.message.text;
-      // return ctx.wizard.next();
-    }
+  //   if (ctx.message && 'text' in ctx.message) {
+  //     ctx.scene.state['model'] = ctx.message.text;
+  //     // return ctx.wizard.next();
+  //   }
 
-    const data = existData(ctx.scene.state['model']);
-    const text = `<b>Модель авто</b>\nПример: Coolray${data}`;
+  //   const data = existData(ctx.scene.state['model']);
+  //   const text = `<b>Модель авто</b>\nПример: Coolray${data}`;
 
-    const keyboard = [
-      [
-        { text: 'Назад', callback_data: 'backStep' },
-        { text: 'Отмена', callback_data: 'leaveScene' },
-      ],
-    ];
+  //   const keyboard = [
+  //     [
+  //       { text: 'Назад', callback_data: 'backStep' },
+  //       { text: 'Отмена', callback_data: 'leaveScene' },
+  //     ],
+  //   ];
 
-    if (data) {
-      keyboard[0].push({ text: 'Далее', callback_data: 'nextStep' });
-    }
+  //   if (data) {
+  //     keyboard[0].push({ text: 'Далее', callback_data: 'nextStep' });
+  //   }
 
-    // await ctx.reply('fdfdfd');
+  //   // await ctx.reply('fdfdfd');
 
-    await this.botMessage.sendMessageToUser(
-      ctx.user,
-      ctx.app,
-      text,
-      keyboard,
-      [],
-    );
-  }
+  //   await this.botMessage.sendMessageToUser(
+  //     ctx.user,
+  //     ctx.app,
+  //     text,
+  //     keyboard,
+  //     [],
+  //   );
+  // }
 
   // @WizardStep(3)
   // async step3(@Ctx() ctx: MyWizardContext) {

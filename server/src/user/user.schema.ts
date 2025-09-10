@@ -10,6 +10,12 @@ export class User {
   @Prop({ unique: true, required: true })
   tId: number;
 
+  @Prop({ default: [] })
+  topMessageId: number[];
+
+  @Prop()
+  downMessageId: number;
+
   @Prop()
   username: string;
 

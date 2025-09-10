@@ -4,6 +4,7 @@ import { Context, Scenes } from 'telegraf';
 import { BotMessage, MediaItem } from '../bot.message';
 import { UserDocument } from 'src/user/user.schema';
 import { AppDocument } from 'src/app/app.schema';
+import { BotService } from '../bot.service';
 
 const existData = (data: any) => {
   if (!data) return '';
@@ -28,7 +29,10 @@ export interface MyWizardContext
 @Injectable()
 @Wizard('test')
 export class Test {
-  constructor(private botMessage: BotMessage) {}
+  constructor(
+    private botMessage: BotMessage,
+    private botService: BotService,
+  ) {}
 
   private data = ['marka', 'model', 'age', 'info', 'media'];
   private wizLength = this.data.length;
@@ -39,6 +43,7 @@ export class Test {
 
       if (data === 'leaveScene') {
         await ctx.scene.leave();
+        await this.botService.start(ctx.user, ctx.app);
         await ctx.answerCbQuery();
         return true;
       }
@@ -66,7 +71,6 @@ export class Test {
     ctx: MyWizardContext,
     field: string,
   ): Promise<boolean> {
-    // Если это не фото и не видео → обрабатываем кнопки
     if (
       !(
         (ctx.message && 'photo' in ctx.message) ||
@@ -76,7 +80,7 @@ export class Test {
       if (ctx.callbackQuery && 'data' in ctx.callbackQuery) {
         return ctx.callbackQuery.data !== 'nextStep';
       }
-      await ctx.reply('Необходимо отправить фото или видео');
+      await ctx.deleteMessage();
       return true;
     }
 
@@ -92,44 +96,33 @@ export class Test {
       mediaItem.file_id = ctx.message.video.file_id;
       mediaItem.type = 'video';
     }
-
-    // Если это альбом
-    if ('media_group_id' in ctx.message) {
-      // setTimeout(() => {
-      if (!Array.isArray(ctx.scene.state[field])) {
-        ctx.scene.state[field] = [];
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      ctx.scene.state[field].push(mediaItem);
-      // }, 400);
-      return false;
-    }
-
     if (!Array.isArray(ctx.scene.state[field])) {
       ctx.scene.state[field] = [];
     }
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     ctx.scene.state[field].push(mediaItem);
-
+    await ctx.deleteMessage();
     return false;
   }
 
   private async saveText(ctx: MyWizardContext, data: string) {
     if (ctx.message && 'text' in ctx.message) {
       ctx.scene.state[data] = ctx.message.text;
+      await ctx.deleteMessage();
       return false;
     }
     if (ctx.callbackQuery && 'data' in ctx.callbackQuery) {
       return ctx.callbackQuery.data !== 'nextStep';
     }
-    await ctx.reply('Необходимо отправить текст');
+    await ctx.deleteMessage();
     return true;
   }
 
   @WizardStep(1)
   async step1(@Ctx() ctx: MyWizardContext) {
     const data = existData(ctx.scene.state[this.data[ctx.wizard.cursor]]);
-    const text = `<b>Марка авто</b> (${ctx.wizard.cursor + 1}/${this.wizLength})\nПример: Geely${data}`;
+    const textTop = `Необходимо отправить текст (${ctx.wizard.cursor + 1}/${this.wizLength})`;
+    const textDown = `<b>Марка авто</b>\nПример: Geely${data}`;
     const keyboard = [[{ text: 'Отмена', callback_data: 'leaveScene' }]];
     if (data) {
       keyboard[0].push({ text: 'Ok', callback_data: 'nextStep' });
@@ -137,20 +130,15 @@ export class Test {
     const media: MediaItem[] =
       'media' in ctx.scene.state
         ? (ctx.scene.state['media'] as MediaItem[])
-        : [
-            {
-              file_id:
-                'AgACAgIAAxkBAAK1SmjAhdehbvgnkVgQscmk9cROkQiMAAJ8_TEbN8oBSur3tCOPliiGAQADAgADeQADNgQ',
-              type: 'photo',
-            },
-          ];
+        : [];
 
-    await this.botMessage.sendMessageToUser(
+    await this.botMessage.sendTopDownMessage(
       ctx.user,
       ctx.app,
-      text,
-      keyboard,
+      textTop,
+      textDown,
       media,
+      keyboard,
     );
     ctx.wizard.next();
   }
@@ -162,8 +150,8 @@ export class Test {
     if (await this.saveText(ctx, this.data[ctx.wizard.cursor - 1])) return;
 
     const data = existData(ctx.scene.state[this.data[ctx.wizard.cursor]]);
-
-    const text = `<b>Модель авто</b> (${ctx.wizard.cursor + 1}/${this.wizLength})\nПример: Coolray${data}`;
+    const textTop = `Необходимо отправить текст (${ctx.wizard.cursor + 1}/${this.wizLength})`;
+    const textDown = `<b>Модель авто</b>\nПример: Coolray${data}`;
 
     const keyboard = [
       [
@@ -179,20 +167,15 @@ export class Test {
     const media: MediaItem[] =
       'media' in ctx.scene.state
         ? (ctx.scene.state['media'] as MediaItem[])
-        : [
-            {
-              file_id:
-                'AgACAgIAAxkBAAK1SmjAhdehbvgnkVgQscmk9cROkQiMAAJ8_TEbN8oBSur3tCOPliiGAQADAgADeQADNgQ',
-              type: 'photo',
-            },
-          ];
+        : [];
 
-    await this.botMessage.sendMessageToUser(
+    await this.botMessage.sendTopDownMessage(
       ctx.user,
       ctx.app,
-      text,
-      keyboard,
+      textTop,
+      textDown,
       media,
+      keyboard,
     );
     ctx.wizard.next();
   }
@@ -204,8 +187,8 @@ export class Test {
     if (await this.saveText(ctx, this.data[ctx.wizard.cursor - 1])) return;
 
     const data = existData(ctx.scene.state[this.data[ctx.wizard.cursor]]);
-
-    const text = `<b>Год выпуска</b> (${ctx.wizard.cursor + 1}/${this.wizLength})\nПример: 2021${data}`;
+    const textTop = `Необходимо отправить текст (${ctx.wizard.cursor + 1}/${this.wizLength})`;
+    const textDown = `<b>Год выпуска</b>\nПример: 2021${data}`;
 
     const keyboard = [
       [
@@ -221,20 +204,15 @@ export class Test {
     const media: MediaItem[] =
       'media' in ctx.scene.state
         ? (ctx.scene.state['media'] as MediaItem[])
-        : [
-            {
-              file_id:
-                'AgACAgIAAxkBAAK1SmjAhdehbvgnkVgQscmk9cROkQiMAAJ8_TEbN8oBSur3tCOPliiGAQADAgADeQADNgQ',
-              type: 'photo',
-            },
-          ];
+        : [];
 
-    await this.botMessage.sendMessageToUser(
+    await this.botMessage.sendTopDownMessage(
       ctx.user,
       ctx.app,
-      text,
-      keyboard,
+      textTop,
+      textDown,
       media,
+      keyboard,
     );
     ctx.wizard.next();
   }
@@ -246,8 +224,8 @@ export class Test {
     if (await this.saveText(ctx, this.data[ctx.wizard.cursor - 1])) return;
 
     const data = existData(ctx.scene.state[this.data[ctx.wizard.cursor]]);
-
-    const text = `<b>Дополнительная информация</b> (${ctx.wizard.cursor + 1}/${this.wizLength})\nПример: Комплектация "Престиж", рестайлинг и т.п. ${data}`;
+    const textTop = `Необходимо отправить текст (${ctx.wizard.cursor + 1}/${this.wizLength})`;
+    const textDown = `<b>Дополнительная информация</b>\nПример: Комплектация "Престиж", рестайлинг и т.п. ${data}`;
 
     const keyboard = [
       [
@@ -263,20 +241,15 @@ export class Test {
     const media: MediaItem[] =
       'media' in ctx.scene.state
         ? (ctx.scene.state['media'] as MediaItem[])
-        : [
-            {
-              file_id:
-                'AgACAgIAAxkBAAK1SmjAhdehbvgnkVgQscmk9cROkQiMAAJ8_TEbN8oBSur3tCOPliiGAQADAgADeQADNgQ',
-              type: 'photo',
-            },
-          ];
+        : [];
 
-    await this.botMessage.sendMessageToUser(
+    await this.botMessage.sendTopDownMessage(
       ctx.user,
       ctx.app,
-      text,
-      keyboard,
+      textTop,
+      textDown,
       media,
+      keyboard,
     );
     ctx.wizard.next();
   }
@@ -288,8 +261,8 @@ export class Test {
     if (await this.saveText(ctx, this.data[ctx.wizard.cursor - 1])) return;
 
     const data = existData(ctx.scene.state[this.data[ctx.wizard.cursor]]);
-
-    const text = `<b>Фото или видео</b> (${ctx.wizard.cursor + 1}/${this.wizLength})`;
+    const textTop = `Необходимо отправить фото или видео (${ctx.wizard.cursor + 1}/${this.wizLength})`;
+    const textDown = `<b>Фото или видео</b>`;
 
     const keyboard = [
       [
@@ -305,20 +278,15 @@ export class Test {
     const media: MediaItem[] =
       'media' in ctx.scene.state
         ? (ctx.scene.state['media'] as MediaItem[])
-        : [
-            {
-              file_id:
-                'AgACAgIAAxkBAAK1SmjAhdehbvgnkVgQscmk9cROkQiMAAJ8_TEbN8oBSur3tCOPliiGAQADAgADeQADNgQ',
-              type: 'photo',
-            },
-          ];
+        : [];
 
-    await this.botMessage.sendMessageToUser(
+    await this.botMessage.sendTopDownMessage(
       ctx.user,
       ctx.app,
-      text,
-      keyboard,
+      textTop,
+      textDown,
       media,
+      keyboard,
     );
     ctx.wizard.next();
   }
@@ -328,8 +296,8 @@ export class Test {
     if (await this.control(ctx)) return;
 
     if (await this.saveMediaAlbum(ctx, 'media')) return;
-
-    const text = `<b>Готово</b>\n${ctx.scene.state['marka']} ${ctx.scene.state['model']} ${ctx.scene.state['age']}г.\n${ctx.scene.state['info']}`;
+    const textTop = '----';
+    const textDown = `<b>Готово</b>\n${ctx.scene.state['marka']} ${ctx.scene.state['model']} ${ctx.scene.state['age']}г.\n${ctx.scene.state['info']}`;
 
     const keyboard = [
       [
@@ -342,20 +310,15 @@ export class Test {
     const media: MediaItem[] =
       'media' in ctx.scene.state
         ? (ctx.scene.state['media'] as MediaItem[])
-        : [
-            {
-              file_id:
-                'AgACAgIAAxkBAAK1SmjAhdehbvgnkVgQscmk9cROkQiMAAJ8_TEbN8oBSur3tCOPliiGAQADAgADeQADNgQ',
-              type: 'photo',
-            },
-          ];
+        : [];
 
-    await this.botMessage.sendMessageToUser(
+    await this.botMessage.sendTopDownMessage(
       ctx.user,
       ctx.app,
-      text,
-      keyboard,
+      textTop,
+      textDown,
       media,
+      keyboard,
     );
   }
 }
