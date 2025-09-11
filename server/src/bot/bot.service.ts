@@ -13,8 +13,8 @@ export class BotService {
   }
 
   async start(user: UserDocument, app: AppDocument) {
-    const topText = 'Фотошки';
-    const downText = 'Добавить авто';
+    const topText = 'Русификация';
+    const downText = 'Запрос';
     const keyboard = [
       [{ text: 'Добавить авто', callback_data: 'test' }],
       [{ text: 'Инструкция', callback_data: 'help' }],

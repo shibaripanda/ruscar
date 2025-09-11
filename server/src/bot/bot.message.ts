@@ -50,30 +50,21 @@ export class BotMessage {
     const mediaGroup: (InputMediaPhoto | InputMediaVideo)[] = [];
     for (const m of media) {
       if (media.indexOf(m) < 10) {
-        if (media.indexOf(m) === 0) {
-          mediaGroup.push({
-            type: m.type,
-            media: m.file_id,
-            caption: this.truncateCaption(topText),
-            parse_mode: 'HTML',
-          });
-        } else {
-          mediaGroup.push({
-            type: m.type,
-            media: m.file_id,
-            caption: String(Date.now()),
-          });
-        }
+        mediaGroup.push({
+          type: m.type,
+          media: m.file_id,
+        });
       }
     }
     while (mediaGroup.length < 10) {
       mediaGroup.push({
         type: 'photo',
         media: app.placeholderImage,
-        caption: String(Date.now()),
       });
     }
-    console.log(mediaGroup.length);
+    mediaGroup[0].caption = this.truncateCaption(topText);
+    mediaGroup[0].parse_mode = 'HTML';
+    console.log(mediaGroup[0], mediaGroup[1]);
     if (user.topMessageId.length) {
       for (const messageId of user.topMessageId) {
         await this.bot.telegram

@@ -121,7 +121,7 @@ export class Test {
   @WizardStep(1)
   async step1(@Ctx() ctx: MyWizardContext) {
     const data = existData(ctx.scene.state[this.data[ctx.wizard.cursor]]);
-    const textTop = `Необходимо отправить текст (${ctx.wizard.cursor + 1}/${this.wizLength})`;
+    const textTop = `Необходимо отправить текст. Шаг ${ctx.wizard.cursor + 1} из ${this.wizLength}`;
     const textDown = `<b>Марка авто</b>\nПример: Geely${data}`;
     const keyboard = [[{ text: 'Отмена', callback_data: 'leaveScene' }]];
     if (data) {
@@ -150,7 +150,7 @@ export class Test {
     if (await this.saveText(ctx, this.data[ctx.wizard.cursor - 1])) return;
 
     const data = existData(ctx.scene.state[this.data[ctx.wizard.cursor]]);
-    const textTop = `Необходимо отправить текст (${ctx.wizard.cursor + 1}/${this.wizLength})`;
+    const textTop = `Необходимо отправить текст. Шаг ${ctx.wizard.cursor + 1} из ${this.wizLength}`;
     const textDown = `<b>Модель авто</b>\nПример: Coolray${data}`;
 
     const keyboard = [
@@ -187,7 +187,7 @@ export class Test {
     if (await this.saveText(ctx, this.data[ctx.wizard.cursor - 1])) return;
 
     const data = existData(ctx.scene.state[this.data[ctx.wizard.cursor]]);
-    const textTop = `Необходимо отправить текст (${ctx.wizard.cursor + 1}/${this.wizLength})`;
+    const textTop = `Необходимо отправить текст. Шаг ${ctx.wizard.cursor + 1} из ${this.wizLength}`;
     const textDown = `<b>Год выпуска</b>\nПример: 2021${data}`;
 
     const keyboard = [
@@ -224,7 +224,7 @@ export class Test {
     if (await this.saveText(ctx, this.data[ctx.wizard.cursor - 1])) return;
 
     const data = existData(ctx.scene.state[this.data[ctx.wizard.cursor]]);
-    const textTop = `Необходимо отправить текст (${ctx.wizard.cursor + 1}/${this.wizLength})`;
+    const textTop = `Необходимо отправить текст. Шаг ${ctx.wizard.cursor + 1} из ${this.wizLength}`;
     const textDown = `<b>Дополнительная информация</b>\nПример: Комплектация "Престиж", рестайлинг и т.п. ${data}`;
 
     const keyboard = [
@@ -261,7 +261,7 @@ export class Test {
     if (await this.saveText(ctx, this.data[ctx.wizard.cursor - 1])) return;
 
     const data = existData(ctx.scene.state[this.data[ctx.wizard.cursor]]);
-    const textTop = `Необходимо отправить фото или видео (${ctx.wizard.cursor + 1}/${this.wizLength})`;
+    const textTop = `Необходимо отправить фото или видео. Шаг ${ctx.wizard.cursor + 1} из ${this.wizLength}`;
     const textDown = `<b>Фото или видео</b>`;
 
     const keyboard = [
@@ -296,7 +296,7 @@ export class Test {
     if (await this.control(ctx)) return;
 
     if (await this.saveMediaAlbum(ctx, 'media')) return;
-    const textTop = '----';
+    const textTop = 'Максимум 10 фото или видео';
     const textDown = `<b>Готово</b>\n${ctx.scene.state['marka']} ${ctx.scene.state['model']} ${ctx.scene.state['age']}г.\n${ctx.scene.state['info']}`;
 
     const keyboard = [
