@@ -23,7 +23,7 @@ export class BotMessage {
     console.log('BotMessage initialized');
   }
 
-  truncateCaption(text: string, maxLength = 1024): string {
+  private truncateCaption(text: string, maxLength = 1024): string {
     if (text.length <= maxLength) return text;
     return text.slice(0, maxLength - 3) + '...';
   }
@@ -36,8 +36,8 @@ export class BotMessage {
     media: MediaItem[],
     keyboard: InlineKeyboardButton[][],
   ) {
-    await this.sendTopMessage(user, app, topText, media);
-    await this.sendDownMessage(user, app, downText, keyboard);
+    const res = await this.sendTopMessage(user, app, topText, media);
+    if (res) await this.sendDownMessage(user, app, downText, keyboard);
   }
 
   async sendTopMessage(
@@ -46,7 +46,6 @@ export class BotMessage {
     topText: string,
     media: MediaItem[],
   ) {
-    console.log('ssssss');
     const mediaGroup: (InputMediaPhoto | InputMediaVideo)[] = [];
     for (const m of media) {
       if (media.indexOf(m) < 10) {
@@ -64,7 +63,7 @@ export class BotMessage {
     }
     mediaGroup[0].caption = this.truncateCaption(topText);
     mediaGroup[0].parse_mode = 'HTML';
-    console.log(mediaGroup[0], mediaGroup[1]);
+    let check = true;
     if (user.topMessageId.length) {
       for (const messageId of user.topMessageId) {
         await this.bot.telegram
@@ -75,20 +74,24 @@ export class BotMessage {
             mediaGroup[user.topMessageId.indexOf(messageId)],
           )
           .catch(async (e: { response: { description: string } }) => {
-            console.log(e.response?.description);
+            // console.log(e.response?.description);
             if (
               e.response?.description ===
               'Bad Request: message to edit not found'
             ) {
+              for (const mes of [user.downMessageId, ...user.topMessageId]) {
+                await this.deleteOrHide(user.tId, mes);
+              }
               user.downMessageId = 0;
               user.topMessageId = [];
               await user.save();
               await this.botService.start(user, app);
+              check = false;
               return;
             }
           });
       }
-      return;
+      return check;
     }
 
     const res = await this.bot.telegram
@@ -98,6 +101,7 @@ export class BotMessage {
       user.topMessageId = res.map((msg) => msg.message_id);
       await user.save();
     }
+    return check;
   }
 
   async sendDownMessage(
@@ -115,7 +119,6 @@ export class BotMessage {
       const res = await this.bot.telegram
         .sendMessage(user.tId, this.truncateCaption(downText, 4000), options)
         .catch((e) => console.log(e));
-      console.log(3);
       if (res) {
         user.downMessageId = res.message_id;
         await user.save();
@@ -135,6 +138,10 @@ export class BotMessage {
         if (
           e.response?.description === 'Bad Request: message to edit not found'
         ) {
+          // await this.deleteOrHide(user.tId, user.downMessageId);
+          for (const mes of [user.downMessageId, ...user.topMessageId]) {
+            await this.deleteOrHide(user.tId, mes);
+          }
           user.downMessageId = 0;
           user.topMessageId = [];
           await user.save();
@@ -142,5 +149,13 @@ export class BotMessage {
           return;
         }
       });
+  }
+
+  private async deleteOrHide(chatId: number, messageId: number) {
+    await this.bot.telegram.deleteMessage(chatId, messageId).catch(async () => {
+      await this.bot.telegram
+        .editMessageText(chatId, messageId, undefined, '.')
+        .catch(() => {});
+    });
   }
 }

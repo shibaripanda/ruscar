@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { BotModule } from 'src/bot/bot.module';
 import { AppSchema } from './app.schema';
 import { JwtModule } from '@nestjs/jwt';
+import { CarModule } from 'src/car/car.module';
 
 @Global()
 @Module({
@@ -32,6 +33,7 @@ import { JwtModule } from '@nestjs/jwt';
     }),
     MongooseModule.forFeature([{ name: 'App', schema: AppSchema }]),
     BotModule,
+    CarModule,
   ],
   controllers: [AppController],
   providers: [AppService],

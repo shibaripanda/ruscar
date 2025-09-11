@@ -10,6 +10,7 @@ import { BotGateway } from './bot.gateway';
 import { session } from 'telegraf';
 import { AddNewCarScene } from './scenes/addNewCar.scene';
 import { Test } from './scenes/test.scene';
+import { CarModule } from 'src/car/car.module';
 
 @Global()
 @Module({
@@ -31,6 +32,7 @@ import { Test } from './scenes/test.scene';
         ],
       }),
     }),
+    CarModule,
   ],
   providers: [BotMessage, BotService, BotGateway, AddNewCarScene, Test],
   exports: [],
