@@ -1,12 +1,17 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 
-export type CarDocument = Car & Document;
+export type CarDocument = HydratedDocument<Car> & { _id: Types.ObjectId };
 
 type Media = { file_id: string; type: 'photo' | 'video' };
+type HistoryItem = { tId: number; text: string; date: number };
+type StatusCar = 'new' | 'open' | 'closeUnhappy' | 'closeHappy';
 
 @Schema({ timestamps: true })
 export class Car {
+  // @Prop()
+  // _id: string;
+
   @Prop({ required: true })
   ownerTid: number;
 
@@ -25,12 +30,22 @@ export class Car {
   @Prop()
   info: string;
 
+  @Prop({ default: false })
+  deleted: boolean;
+
+  @Prop()
+  dateForWork: Date;
+
   @Prop()
   media: Media[];
-}
 
-//['marka', 'model', 'age', 'vin', 'info', 'media']
+  @Prop({ default: 'new' })
+  status: StatusCar;
+
+  @Prop({ default: [] })
+  dataHistoryLine: HistoryItem[];
+}
 
 export const CarSchema = SchemaFactory.createForClass(Car);
 
-// UserSchema.index({ subscriptionExpiresAt: 1, status: 1 });
+CarSchema.index({ ownerTid: 1, marka: 1 });

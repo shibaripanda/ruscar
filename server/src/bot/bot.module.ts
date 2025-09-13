@@ -8,8 +8,7 @@ import { BotMessage } from './bot.message';
 import { BotService } from './bot.service';
 import { BotGateway } from './bot.gateway';
 import { session } from 'telegraf';
-import { AddNewCarScene } from './scenes/addNewCar.scene';
-import { Test } from './scenes/test.scene';
+import { AddCar } from './scenes/addcar.scene';
 import { CarModule } from 'src/car/car.module';
 
 @Global()
@@ -34,7 +33,7 @@ import { CarModule } from 'src/car/car.module';
     }),
     CarModule,
   ],
-  providers: [BotMessage, BotService, BotGateway, AddNewCarScene, Test],
+  providers: [BotMessage, BotService, BotGateway, AddCar],
   exports: [],
 })
 export class BotModule {}

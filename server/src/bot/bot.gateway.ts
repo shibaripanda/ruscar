@@ -1,13 +1,14 @@
 import { Update, Command, Ctx, Action, On } from 'nestjs-telegraf';
 import { AppService } from 'src/app/app.service';
-import { ContextWithUserApp } from './interfaces/contexUserApp';
+import {
+  ContextWithUserApp,
+  MyWizardContext,
+} from './interfaces/contexUserApp';
 import { Injectable, UseGuards } from '@nestjs/common';
 import { RoleGuard } from './guards/access-control.guard';
 import { SetMetadata } from '@nestjs/common';
 import { BotService } from './bot.service';
-import { MyWizardContext } from './scenes/addNewCar.scene';
 import { Message } from '@telegraf/types';
-// import { addNewCarScene, MyWizardContext } from './scenes/addNewCar.scene';
 
 export const Roles = (...roles: string[]) => SetMetadata('roles', roles);
 
@@ -21,15 +22,16 @@ export class BotGateway {
     console.log('BotGateway initialized');
   }
 
-  @Action('test')
-  async wizardTest(@Ctx() ctx: MyWizardContext) {
-    await ctx.scene.enter('test');
-    await ctx.answerCbQuery();
+  @UseGuards(RoleGuard)
+  @Roles()
+  @Action('myCars')
+  async myCars(@Ctx() ctx: ContextWithUserApp) {
+    await this.botService.myCars(ctx.user, ctx.app);
   }
 
-  @Action('addNewCar')
-  async wizard(@Ctx() ctx: MyWizardContext) {
-    await ctx.scene.enter('addNewCar');
+  @Action('addcar')
+  async wizardTest(@Ctx() ctx: MyWizardContext) {
+    await ctx.scene.enter('addcar');
     await ctx.answerCbQuery();
   }
 
@@ -38,6 +40,23 @@ export class BotGateway {
   @Action('leaveScene')
   async leaveScene(@Ctx() ctx: ContextWithUserApp) {
     await this.botService.start(ctx.user, ctx.app);
+  }
+
+  @UseGuards(RoleGuard)
+  @Roles()
+  @Action(/car\|(.+)/)
+  async car(@Ctx() ctx: ContextWithUserApp) {
+    const [, _id]: [string, string] = ctx.match as unknown as [string, string];
+    await this.botService.showCar(ctx.user, ctx.app, _id);
+    await ctx.answerCbQuery();
+  }
+
+  @UseGuards(RoleGuard)
+  @Roles()
+  @Action('startScreen')
+  async startScreen(@Ctx() ctx: ContextWithUserApp) {
+    await this.botService.start(ctx.user, ctx.app);
+    await ctx.answerCbQuery();
   }
 
   @UseGuards(RoleGuard)

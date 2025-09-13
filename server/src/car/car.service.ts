@@ -13,8 +13,24 @@ export class CarService {
     console.log('CarService initialized');
   }
 
-  async createCar(car: Car): Promise<CarDocument | null> {
-    if (!car) return null;
+  async getCar(_id: string): Promise<CarDocument | null> {
+    return await this.carModel.findById(_id);
+  }
+
+  showCarForUser(car: CarDocument) {
+    return {
+      showText: `🚘 <b>${car.marka} ${car.model} ${car.age}</b>\n${car.vin}\n${car.info}`,
+      showMedia: car.media,
+    };
+  }
+
+  async getMyCars(tId: number): Promise<CarDocument[]> {
+    const cars = await this.carModel.find({ ownerTid: tId });
+    return cars;
+  }
+
+  async createCar(car: Car): Promise<CarDocument> {
+    // if (!car) return null;
     const created = new this.carModel(car);
     return created.save();
   }

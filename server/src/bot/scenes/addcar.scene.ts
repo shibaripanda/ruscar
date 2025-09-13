@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Wizard, WizardStep, Ctx } from 'nestjs-telegraf';
-import { Context, Scenes } from 'telegraf';
+import { Scenes } from 'telegraf';
 import { BotMessage, MediaItem } from '../bot.message';
-import { UserDocument } from 'src/user/user.schema';
-import { AppDocument } from 'src/app/app.schema';
 import { BotService } from '../bot.service';
 import { Car } from 'src/car/car.schema';
+import { MyWizardContext } from '../interfaces/contexUserApp';
 
 export interface AddCarWizardState extends Scenes.WizardSessionData {
   marka?: string;
@@ -15,16 +14,9 @@ export interface AddCarWizardState extends Scenes.WizardSessionData {
   media?: MediaItem[];
 }
 
-export interface MyWizardContext
-  extends Context,
-    Scenes.WizardContext<AddCarWizardState> {
-  user: UserDocument;
-  app: AppDocument;
-}
-
 @Injectable()
-@Wizard('test')
-export class Test {
+@Wizard('addcar')
+export class AddCar {
   constructor(
     private botMessage: BotMessage,
     private botService: BotService,
