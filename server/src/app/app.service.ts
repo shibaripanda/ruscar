@@ -33,7 +33,7 @@ export class AppService {
 
   getAuthLink(id: number): string {
     const token = this.generateToken(String(id));
-    return `${this.config.get<string>('WEB_URL')}/#/?token=${token}`;
+    return `${this.config.get<string>('WEB_URL')}/access/?token=${token}`;
   }
 
   generateToken(userId: string): string {

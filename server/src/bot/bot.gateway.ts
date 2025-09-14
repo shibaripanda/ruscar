@@ -49,13 +49,8 @@ export class BotGateway {
   @Action(/editCar\|(.+)/)
   async editCar(@Ctx() ctx: MyWizardContext) {
     const [, _id]: [string, string] = ctx.match as unknown as [string, string];
-
     const car = await this.carService.getCar(_id);
-
-    // передаём данные в сцену через state
-    await ctx.scene.enter('addcar', { ...car });
-
-    // await ctx.scene.enter('addcar', _id);
+    if (car) await ctx.scene.enter('addcar', car.toObject());
     await ctx.answerCbQuery();
   }
 
@@ -97,9 +92,7 @@ export class BotGateway {
   @Roles('superadmin')
   @Command('enter')
   async getAuthLink(@Ctx() ctx: ContextWithUserApp) {
-    await ctx.reply(this.appService.getAuthLink(ctx.from!.id)).catch((e) => {
-      console.log(e);
-    });
+    await this.botService.getAuthLink(ctx.user, ctx.app);
     await ctx.deleteMessage();
   }
 

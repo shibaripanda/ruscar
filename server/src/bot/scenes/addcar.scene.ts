@@ -3,20 +3,8 @@ import { Wizard, WizardStep, Ctx } from 'nestjs-telegraf';
 import { Scenes } from 'telegraf';
 import { BotMessage, MediaItem } from '../bot.message';
 import { BotService } from '../bot.service';
-import { Car } from 'src/car/car.schema';
+import { Car, CarDocument } from 'src/car/car.schema';
 import { MyWizardContext } from '../interfaces/contexUserApp';
-
-// export interface AddCarWizardState extends Scenes.WizardSessionData {
-// данные для редактирования (из базы)
-// car?: CarDocument;
-
-// поля, которые будут накапливаться в ходе wizard
-// marka?: string;
-// model?: string;
-// age?: string;
-// info?: string;
-// media?: MediaItem[];
-// }
 
 export interface AddCarWizardState extends Scenes.WizardSessionData {
   marka?: string;
@@ -45,6 +33,10 @@ export class AddCar {
     return { ...ctx.scene.state, ownerTid: ctx.user.tId } as Car;
   }
 
+  private formExistCar(ctx: MyWizardContext) {
+    return { ...ctx.scene.state, ownerTid: ctx.user.tId } as CarDocument;
+  }
+
   private async control(ctx: MyWizardContext) {
     if (ctx.callbackQuery && 'data' in ctx.callbackQuery) {
       const data = ctx.callbackQuery.data;
@@ -67,6 +59,13 @@ export class AddCar {
       if (data === 'create') {
         const newCar = this.formCar(ctx);
         await this.botService.createCar(ctx.user, ctx.app, newCar);
+        await ctx.scene.leave();
+        await ctx.answerCbQuery();
+        return true;
+      }
+      if (data === 'update') {
+        const newCar = this.formExistCar(ctx);
+        await this.botService.updateCar(ctx.user, ctx.app, newCar);
         await ctx.scene.leave();
         await ctx.answerCbQuery();
         return true;
@@ -143,7 +142,6 @@ export class AddCar {
 
   @WizardStep(1)
   async step1(@Ctx() ctx: MyWizardContext) {
-    console.log(ctx.scene.state);
     const data = this.existData(ctx.scene.state[this.data[ctx.wizard.cursor]]);
     const textTop = this.topTextLine(ctx, 'Необходимо отправить текст');
     const textDown = `<b>Марка авто</b>\n<i>Пример: Geely</i>${data}`;
@@ -367,9 +365,14 @@ export class AddCar {
       [
         { text: 'Редактировать', callback_data: 'edit' },
         { text: 'Отмена', callback_data: 'leaveScene' },
-        { text: 'Создать запрос', callback_data: 'create' },
+        // { text: 'Создать запрос', callback_data: 'create' },
       ],
     ];
+    if (typeof ctx.scene.state['_id'] !== 'undefined') {
+      keyboard[0].push({ text: 'Обновить', callback_data: 'update' });
+    } else {
+      keyboard[0].push({ text: 'Создать запрос', callback_data: 'create' });
+    }
 
     const media: MediaItem[] =
       'media' in ctx.scene.state
