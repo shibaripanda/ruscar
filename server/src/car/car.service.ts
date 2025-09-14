@@ -13,6 +13,10 @@ export class CarService {
     console.log('CarService initialized');
   }
 
+  async deleteCar(_id: string): Promise<CarDocument | null> {
+    return await this.carModel.findByIdAndDelete(_id);
+  }
+
   async getCar(_id: string): Promise<CarDocument | null> {
     return await this.carModel.findById(_id);
   }

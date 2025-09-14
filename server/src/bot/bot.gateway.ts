@@ -9,6 +9,7 @@ import { RoleGuard } from './guards/access-control.guard';
 import { SetMetadata } from '@nestjs/common';
 import { BotService } from './bot.service';
 import { Message } from '@telegraf/types';
+import { CarService } from 'src/car/car.service';
 
 export const Roles = (...roles: string[]) => SetMetadata('roles', roles);
 
@@ -18,6 +19,7 @@ export class BotGateway {
   constructor(
     private appService: AppService,
     private botService: BotService,
+    private carService: CarService,
   ) {
     console.log('BotGateway initialized');
   }
@@ -40,6 +42,30 @@ export class BotGateway {
   @Action('leaveScene')
   async leaveScene(@Ctx() ctx: ContextWithUserApp) {
     await this.botService.start(ctx.user, ctx.app);
+  }
+
+  @UseGuards(RoleGuard)
+  @Roles()
+  @Action(/editCar\|(.+)/)
+  async editCar(@Ctx() ctx: MyWizardContext) {
+    const [, _id]: [string, string] = ctx.match as unknown as [string, string];
+
+    const car = await this.carService.getCar(_id);
+
+    // передаём данные в сцену через state
+    await ctx.scene.enter('addcar', { ...car });
+
+    // await ctx.scene.enter('addcar', _id);
+    await ctx.answerCbQuery();
+  }
+
+  @UseGuards(RoleGuard)
+  @Roles()
+  @Action(/deleteCar\|(.+)/)
+  async deleteCar(@Ctx() ctx: ContextWithUserApp) {
+    const [, _id]: [string, string] = ctx.match as unknown as [string, string];
+    await this.botService.deleteCar(ctx.user, ctx.app, _id);
+    await ctx.answerCbQuery();
   }
 
   @UseGuards(RoleGuard)

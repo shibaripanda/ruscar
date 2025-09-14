@@ -6,6 +6,18 @@ import { BotService } from '../bot.service';
 import { Car } from 'src/car/car.schema';
 import { MyWizardContext } from '../interfaces/contexUserApp';
 
+// export interface AddCarWizardState extends Scenes.WizardSessionData {
+// данные для редактирования (из базы)
+// car?: CarDocument;
+
+// поля, которые будут накапливаться в ходе wizard
+// marka?: string;
+// model?: string;
+// age?: string;
+// info?: string;
+// media?: MediaItem[];
+// }
+
 export interface AddCarWizardState extends Scenes.WizardSessionData {
   marka?: string;
   model?: string;
@@ -131,6 +143,7 @@ export class AddCar {
 
   @WizardStep(1)
   async step1(@Ctx() ctx: MyWizardContext) {
+    console.log(ctx.scene.state);
     const data = this.existData(ctx.scene.state[this.data[ctx.wizard.cursor]]);
     const textTop = this.topTextLine(ctx, 'Необходимо отправить текст');
     const textDown = `<b>Марка авто</b>\n<i>Пример: Geely</i>${data}`;

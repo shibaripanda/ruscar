@@ -20,4 +20,5 @@ export interface MyWizardContext
     Scenes.WizardContext<AddCarWizardState> {
   user: UserDocument;
   app: AppDocument;
+  match?: RegExpMatchArray;
 }

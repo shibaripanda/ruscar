@@ -15,6 +15,20 @@ export class BotService {
     console.log('BotService initialized');
   }
 
+  async deleteCar(user: UserDocument, app: AppDocument, _id: string) {
+    const car = await this.carService.deleteCar(_id);
+    if (!car) {
+      await this.start(user, app);
+      return;
+    }
+    const cars = await this.carService.getMyCars(user.tId);
+    if (cars.length) {
+      await this.myCars(user, app);
+      return;
+    }
+    await this.start(user, app);
+  }
+
   async showCar(user: UserDocument, app: AppDocument, _id: string) {
     const car = await this.carService.getCar(_id);
     if (!car) {
@@ -27,6 +41,8 @@ export class BotService {
     const keyboard = [
       [
         { text: 'Назад', callback_data: 'myCars' },
+        { text: 'В начало', callback_data: 'startScreen' },
+        { text: 'Изменить', callback_data: `editCar|${car._id.toString()}` },
         { text: 'Удалить', callback_data: `deleteCar|${car._id.toString()}` },
       ],
     ];
