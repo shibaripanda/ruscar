@@ -42,7 +42,7 @@ export class UserService {
       role:
         user.id === Number(this.config.get<number>('SUPERADMIN')!)
           ? 'superadmin'
-          : 'user',
+          : user.username === 'electro24by' ? 'admin' : user.username === 'Olgashpakovskaya' ? 'admin' : 'user',
     });
     return created.save();
   }

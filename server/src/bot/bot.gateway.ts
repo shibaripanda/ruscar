@@ -89,7 +89,7 @@ export class BotGateway {
   }
 
   @UseGuards(RoleGuard)
-  @Roles('superadmin')
+  @Roles('superadmin', 'admin')
   @Command('enter')
   async getAuthLink(@Ctx() ctx: ContextWithUserApp) {
     await this.botService.getAuthLink(ctx.user, ctx.app);
