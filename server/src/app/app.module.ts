@@ -7,6 +7,9 @@ import { BotModule } from 'src/bot/bot.module';
 import { AppSchema } from './app.schema';
 import { JwtModule } from '@nestjs/jwt';
 import { CarModule } from 'src/car/car.module';
+import { AppGateway } from './app.gateway';
+import { SocketAuthMiddleware } from './auth-guards/socket-auth.middleware';
+import { UserModule } from 'src/user/user.module';
 
 @Global()
 @Module({
@@ -34,9 +37,10 @@ import { CarModule } from 'src/car/car.module';
     MongooseModule.forFeature([{ name: 'App', schema: AppSchema }]),
     BotModule,
     CarModule,
+    UserModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AppGateway, SocketAuthMiddleware],
   exports: [AppService],
 })
 export class AppModule {}

@@ -5,10 +5,13 @@ import { BotMessage } from './bot.message';
 import { CarService } from 'src/car/car.service';
 import { Car, CarDocument } from 'src/car/car.schema';
 import { AppService } from 'src/app/app.service';
+import { InjectBot } from 'nestjs-telegraf';
+import { Telegraf } from 'telegraf'
 
 @Injectable()
 export class BotService {
   constructor(
+    @InjectBot() private bot: Telegraf,
     @Inject(forwardRef(() => BotMessage))
     private botMessage: BotMessage,
     private carService: CarService,
@@ -203,8 +206,8 @@ export class BotService {
     const topText = 'Вход в веб панель';
     const downText = `<code>${link}</code>`;
     const keyboard = [
-      [{ text: 'Добавить авто', callback_data: 'addcar' }],
-      [{ text: 'О нас', callback_data: 'about' }],
+      [{ text: 'Вход', url: `http://${link}` }],
+      [{ text: 'Назад', callback_data: 'startScreen' }],
     ];
     const media = [];
     await this.botMessage.sendTopDownMessage(
@@ -216,4 +219,5 @@ export class BotService {
       keyboard,
     );
   }
+
 }

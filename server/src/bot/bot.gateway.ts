@@ -17,7 +17,6 @@ export const Roles = (...roles: string[]) => SetMetadata('roles', roles);
 @Injectable()
 export class BotGateway {
   constructor(
-    private appService: AppService,
     private botService: BotService,
     private carService: CarService,
   ) {
@@ -84,6 +83,7 @@ export class BotGateway {
   @Roles()
   @Command('start')
   async start(@Ctx() ctx: ContextWithUserApp) {
+    console.log('start');
     await this.botService.start(ctx.user, ctx.app);
     await ctx.deleteMessage();
   }

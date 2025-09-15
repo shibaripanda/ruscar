@@ -3,14 +3,49 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Car, CarDocument } from './car.schema';
 import { Model } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
+import { rendomNumberOrder } from 'src/tech/rendomNumberOrder';
+import { rendomLetteOrder } from 'src/tech/rendomLetteOrder';
+import { InjectBot } from 'nestjs-telegraf';
+import { Telegraf } from 'telegraf'
 
 @Injectable()
 export class CarService {
   constructor(
+    @InjectBot() private bot: Telegraf,
     @InjectModel(Car.name) private carModel: Model<CarDocument>,
     private readonly config: ConfigService,
   ) {
     console.log('CarService initialized');
+  }
+
+  async updateCarHistory(_id: string, text: string, tId: number): Promise<CarDocument | null> {
+    return await this.carModel.findOneAndUpdate(
+      { _id: _id },
+      {
+        $push: {
+          dataHistoryLine: { tId, text, date: Date.now() },
+        },
+      },
+      { new: true },
+    );
+  }
+
+  async getCarPhotos(_id: string){
+    const res = await this.getCar(_id);
+    if(res){
+      const bufferArray: string[] = []
+      for(const i of res.media.filter(item => item.type === 'photo').map(item => item.file_id)){
+        const url = await this.bot.telegram.getFileLink(i)
+        const buffer: ArrayBuffer = await (await fetch(url.href)).arrayBuffer()
+        bufferArray.push(Buffer.from(buffer).toString('base64')) 
+      }
+      return bufferArray
+    }
+    return []
+  }
+
+  async getCars(): Promise<CarDocument[]> {
+    return await this.carModel.find({});
   }
 
   async deleteCar(_id: string, tId: number): Promise<CarDocument | null> {
@@ -63,8 +98,8 @@ export class CarService {
   }
 
   async createCar(car: Car): Promise<CarDocument> {
-    // if (!car) return null;
-    const created = new this.carModel(car);
+    const index = rendomNumberOrder({min: 1000, max: 9999}) + '_' + rendomLetteOrder() + rendomLetteOrder() + rendomLetteOrder();
+    const created = new this.carModel({...car, order: index});
     return created.save();
   }
 }

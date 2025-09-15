@@ -9,14 +9,15 @@ type StatusCar = 'new' | 'open' | 'closeUnhappy' | 'closeHappy';
 
 @Schema({ timestamps: true })
 export class Car {
-  // @Prop()
-  // _id: string;
 
   @Prop({ required: true })
   ownerTid: number;
 
   @Prop()
   marka: string;
+
+  @Prop({ default: 'AAA_0000' })
+  order: string;
 
   @Prop()
   model: string;
