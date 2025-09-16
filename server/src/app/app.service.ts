@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { TokenAndUserId } from './interfaces/tokenAndUserId';
 import { JwtService } from '@nestjs/jwt';
 import { CarService } from 'src/car/car.service';
+import { StatusCar } from 'src/car/car.schema';
 
 @Injectable()
 export class AppService {
@@ -27,6 +28,14 @@ export class AppService {
       { $setOnInsert: { docName: 'settings' } },
       { upsert: true },
     );
+  }
+
+  async statusCar(_id: string, status: StatusCar, tId: number): Promise<any> {
+    return await this.carService.statusCar(_id, status, tId);
+  }
+
+  async deleteCar(_id: string): Promise<any> {
+    return await this.carService.deleteCarTotal(_id);
   }
 
   async addHistory(_id: string, text: string, tId: number): Promise<any> {

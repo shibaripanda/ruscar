@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Car, CarDocument } from './car.schema';
+import { Car, CarDocument, StatusCar } from './car.schema';
 import { Model } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
 import { rendomNumberOrder } from 'src/tech/rendomNumberOrder';
@@ -16,6 +16,16 @@ export class CarService {
     private readonly config: ConfigService,
   ) {
     console.log('CarService initialized');
+  }
+
+  async statusCar(_id: string, status: StatusCar, tId: number): Promise<CarDocument | null> {
+    return await this.carModel.findOneAndUpdate({ _id: _id }, {status: status, $push: {
+          dataHistoryLine: { tId, text: `Статус изменен на "${status}"`, date: Date.now() },
+        },}, { new: true });
+  }
+
+  async deleteCarTotal(_id: string): Promise<CarDocument | null> {
+    return await this.carModel.findOneAndDelete({ _id: _id });
   }
 
   async updateCarHistory(_id: string, text: string, tId: number): Promise<CarDocument | null> {
@@ -70,7 +80,7 @@ export class CarService {
 
   showCarForUser(car: CarDocument) {
     return {
-      showText: `🚘 <b>${car.marka} ${car.model} ${car.age}</b>\n${car.vin}\n${car.info}`,
+      showText: `<b>Запрос: ${car.order}</b>\n🚘▫️▫️▫️▫️▫️▫️▫️▫️\n<b>${car.marka} ${car.model} ${car.age}</b>\n${car.vin}\n${car.info}`,
       showMedia: car.media,
     };
   }

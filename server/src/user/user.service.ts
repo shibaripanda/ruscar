@@ -22,6 +22,10 @@ export class UserService {
   //   console.log('exist users', await this.userModel.find({}));
   // }
 
+  async getUser(tId: number): Promise<UserDocument | null> {
+    return await this.userModel.findOne({tId: tId});
+  }
+
   async createOrUpdateUser(user: TelegramUser): Promise<UserDocument | null> {
     if (!user) return null;
 

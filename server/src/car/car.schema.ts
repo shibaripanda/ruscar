@@ -5,7 +5,7 @@ export type CarDocument = HydratedDocument<Car> & { _id: Types.ObjectId };
 
 type Media = { file_id: string; type: 'photo' | 'video' };
 type HistoryItem = { tId: number; text: string; date: number };
-type StatusCar = 'new' | 'open' | 'closeUnhappy' | 'closeHappy';
+export type StatusCar = 'new' | 'open' | 'closeUnhappy' | 'closeHappy';
 
 @Schema({ timestamps: true })
 export class Car {

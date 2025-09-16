@@ -2,11 +2,12 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TokenData } from '../interfaces/tokenData';
 import { AuthenticatedSocket } from '../interfaces/authenticatedSocket';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class SocketAuthMiddleware {
-  constructor(private jwt: JwtService) {}
-  use(socket: AuthenticatedSocket, next: (err?: any) => void) {
+  constructor(private jwt: JwtService, private userService: UserService) {}
+  async use(socket: AuthenticatedSocket, next: (err?: any) => void) {
     const token: string | undefined = (
       socket.handshake.auth as { token?: string }
     )?.token;
@@ -17,7 +18,9 @@ export class SocketAuthMiddleware {
 
     try {
       const payload = this.jwt.verify<TokenData>(token);
-      socket.data.user = payload;
+      const user = await this.userService.getUser(Number(payload.userId))
+      if (!user) return;
+      socket.data.user = user;
       console.log('SocketAuthMiddleware');
       next();
     } catch (err) {
