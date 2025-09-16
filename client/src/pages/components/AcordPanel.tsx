@@ -43,8 +43,8 @@ export function AcordPanel({car, addHistory} : CarAcordPanel) {
               <Image 
                 src={`data:image/jpeg;base64,${item}`}
                 radius="sm"
-                h='20vmax'
-                w="auto"
+                h='auto'
+                w="15vmax"
               />
             </Grid.Col>
           )}

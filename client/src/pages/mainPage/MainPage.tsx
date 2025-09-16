@@ -37,7 +37,8 @@ export function MainPage({ socket, isSocketConnected}: any) {
   const getGarage = async () => {
     socket.emit('getGarage', {}, (response: Car[]) => {
       console.log('response', response)
-      setCars(response.map(car => ({...car, media: []})).sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()));
+      setCars(response.map(car => ({...car, media: []})));
+      // setCars(response.map(car => ({...car, media: []})).sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()));
     });
   };
 
@@ -57,7 +58,7 @@ export function MainPage({ socket, isSocketConnected}: any) {
   return (
     <Container size="lg" className={classes.wrapper}>
       <Title ta="center" className={classes.title}>
-        Авто
+        RUSCAR24
       </Title>
 
       <Accordion variant="separated" value={valueCar} onChange={setValueCar}>

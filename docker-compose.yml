@@ -15,7 +15,7 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_WEB_URL: http://138.197.179.209:5111
-    image: pandadoker/ruscar:v1
+    image: pandadoker/ruscar:v2
     container_name: ruscar
     restart: always
     env_file:

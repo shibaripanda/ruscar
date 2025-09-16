@@ -206,7 +206,7 @@ export class BotService {
     const topText = 'Вход в веб панель';
     const downText = `<code>${link}</code>`;
     const keyboard = [
-      [{ text: 'Вход', url: `http://${link}` }],
+      [{ text: 'Вход', url: `${link}` }],
       [{ text: 'Назад', callback_data: 'startScreen' }],
     ];
     const media = [];
