@@ -14,6 +14,7 @@ export function AcordPanel({car, addHistory} : CarAcordPanel) {
    return (
     <Accordion.Panel>
         {car.vin}
+        <Space h='sm'/>
         {car.info}
         <Space h='sm'/>
         <Textarea onChange={(v) => setHistoryTexy(v.target.value)} value={historyText}/>
