@@ -5,6 +5,7 @@ import { BotMessage, MediaItem } from '../bot.message';
 import { BotService } from '../bot.service';
 import { Car, CarDocument } from 'src/car/car.schema';
 import { MyWizardContext } from '../interfaces/contexUserApp';
+import { CarService } from 'src/car/car.service';
 
 export interface AddCarWizardState extends Scenes.WizardSessionData {
   marka?: string;
@@ -20,9 +21,10 @@ export class AddCar {
   constructor(
     private botMessage: BotMessage,
     private botService: BotService,
+    private carService: CarService,
   ) {}
 
-  private data = ['marka', 'model', 'age', 'vin', 'info', 'media'];
+  private data = ['marka', 'model', 'age', 'vin', 'info', 'contact', 'media'];
   private wizLength = this.data.length;
 
   private topTextLine(ctx: MyWizardContext, text: string) {
@@ -120,6 +122,14 @@ export class AddCar {
       return false;
     }
     if (ctx.callbackQuery && 'data' in ctx.callbackQuery) {
+      const dataCb = ctx.callbackQuery.data;
+      if (/buttonData\|(.+)/.test(dataCb)) {
+        const butData = dataCb.split('|');
+        ctx.scene.state[data] = butData[1];
+        await ctx.answerCbQuery();
+        return false;
+      }
+      
       return ctx.callbackQuery.data !== 'nextStep';
     }
     await ctx.deleteMessage();
@@ -137,17 +147,22 @@ export class AddCar {
   }
 
   private readyList(ctx: MyWizardContext) {
-    return `<b>${this.existDataList(ctx, 'marka')} ${this.existDataList(ctx, 'model')} ${this.existDataList(ctx, 'age')}</b>\n${this.existDataList(ctx, 'vin')}\n${this.existDataList(ctx, 'info')}`;
+    return `<b>${this.existDataList(ctx, 'marka')} ${this.existDataList(ctx, 'model')} ${this.existDataList(ctx, 'age')}</b>\n${this.existDataList(ctx, 'vin')}\n${this.existDataList(ctx, 'info')}\n${this.existDataList(ctx, 'contact')}`;
   }
 
   @WizardStep(1)
   async step1(@Ctx() ctx: MyWizardContext) {
-    const data = this.existData(ctx.scene.state[this.data[ctx.wizard.cursor]]);
-    const textTop = this.topTextLine(ctx, 'Необходимо отправить текст');
+    const stepData = this.data[ctx.wizard.cursor];
+    const data = this.existData(ctx.scene.state[stepData]);
+    const textTop = this.topTextLine(ctx, 'Необходимо отправить текст или выбрать вариант');
     const textDown = `<b>Марка авто</b>\n<i>Пример: Geely</i>${data}`;
+    const existCarData = await this.carService.getInfoAboutCars(stepData, {});
     const keyboard = [[{ text: 'Отмена', callback_data: 'leaveScene' }]];
+    for (const itemData of existCarData) {
+      if (itemData !== ctx.scene.state[stepData]) keyboard.unshift([{ text: itemData, callback_data: `buttonData|${itemData}` }])
+    }
     if (data) {
-      keyboard[0].push({ text: 'Ok', callback_data: 'nextStep' });
+      keyboard[keyboard.length - 1].push({ text: 'Далее', callback_data: 'nextStep' });
     }
     const media: MediaItem[] =
       'media' in ctx.scene.state
@@ -171,9 +186,12 @@ export class AddCar {
 
     if (await this.saveText(ctx, this.data[ctx.wizard.cursor - 1])) return;
 
-    const data = this.existData(ctx.scene.state[this.data[ctx.wizard.cursor]]);
-    const textTop = this.topTextLine(ctx, 'Необходимо отправить текст');
+    const stepData = this.data[ctx.wizard.cursor];
+    const data = this.existData(ctx.scene.state[stepData]);
+    const textTop = this.topTextLine(ctx, 'Необходимо отправить текст или выбрать вариант');
     const textDown = `<b>Модель авто</b>\n<i>Пример: Coolray</i>${data}`;
+
+    const existCarData = await this.carService.getInfoAboutCars(stepData, {marka: ctx.scene.state['marka']});
 
     const keyboard = [
       [
@@ -182,8 +200,12 @@ export class AddCar {
       ],
     ];
 
+    for (const itemData of existCarData) {
+      if (itemData !== ctx.scene.state[stepData]) keyboard.unshift([{ text: itemData, callback_data: `buttonData|${itemData}` }])
+    }
+
     if (data) {
-      keyboard[0].push({ text: 'Ok', callback_data: 'nextStep' });
+      keyboard[keyboard.length - 1].push({ text: 'Далее', callback_data: 'nextStep' });
     }
 
     const media: MediaItem[] =
@@ -208,10 +230,11 @@ export class AddCar {
 
     if (await this.saveText(ctx, this.data[ctx.wizard.cursor - 1])) return;
 
-    const data = this.existData(ctx.scene.state[this.data[ctx.wizard.cursor]]);
-    const textTop = this.topTextLine(ctx, 'Необходимо отправить текст');
+    const stepData = this.data[ctx.wizard.cursor];
+    const data = this.existData(ctx.scene.state[stepData]);
+    const textTop = this.topTextLine(ctx, 'Необходимо отправить текст или выбрать вариант');
     const textDown = `<b>Год выпуска</b>\n<i>Пример: 2021</i>${data}`;
-
+    const existCarData = await this.carService.getInfoAboutCars(stepData, {marka: ctx.scene.state['marka'], model: ctx.scene.state['model']});
     const keyboard = [
       [
         { text: 'Редактировать', callback_data: 'edit' },
@@ -219,8 +242,12 @@ export class AddCar {
       ],
     ];
 
+    for (const itemData of existCarData) {
+      if (itemData !== ctx.scene.state[stepData]) keyboard.unshift([{ text: itemData, callback_data: `buttonData|${itemData}` }])
+    }
+
     if (data) {
-      keyboard[0].push({ text: 'Ok', callback_data: 'nextStep' });
+      keyboard[keyboard.length - 1].push({ text: 'Далее', callback_data: 'nextStep' });
     }
 
     const media: MediaItem[] =
@@ -257,7 +284,7 @@ export class AddCar {
     ];
 
     if (data) {
-      keyboard[0].push({ text: 'Ok', callback_data: 'nextStep' });
+      keyboard[0].push({ text: 'Далее', callback_data: 'nextStep' });
     }
 
     const media: MediaItem[] =
@@ -294,7 +321,7 @@ export class AddCar {
     ];
 
     if (data) {
-      keyboard[0].push({ text: 'Ok', callback_data: 'nextStep' });
+      keyboard[0].push({ text: 'Далее', callback_data: 'nextStep' });
     }
 
     const media: MediaItem[] =
@@ -320,11 +347,8 @@ export class AddCar {
     if (await this.saveText(ctx, this.data[ctx.wizard.cursor - 1])) return;
 
     const data = this.existData(ctx.scene.state[this.data[ctx.wizard.cursor]]);
-    const textTop = this.topTextLine(
-      ctx,
-      'Необходимо отправить фото или видео',
-    );
-    const textDown = `<b>Фото или видео</b>\n<i>Важно: вся передняя панель, мультимедия, если получается фото версии прошивки, фото снаружи</i>\n(иногда важно для редких модификаций)`;
+    const textTop = this.topTextLine(ctx, 'Необходимо отправить текст');
+    const textDown = `<b>Контакты</b>\n<i>Пример: +375290000000, @username</i>${data}`;
 
     const keyboard = [
       [
@@ -334,7 +358,7 @@ export class AddCar {
     ];
 
     if (data) {
-      keyboard[0].push({ text: 'Ok', callback_data: 'nextStep' });
+      keyboard[0].push({ text: 'Далее', callback_data: 'nextStep' });
     }
 
     const media: MediaItem[] =
@@ -355,6 +379,46 @@ export class AddCar {
 
   @WizardStep(7)
   async step7(@Ctx() ctx: MyWizardContext) {
+    if (await this.control(ctx)) return;
+
+    if (await this.saveText(ctx, this.data[ctx.wizard.cursor - 1])) return;
+
+    const data = this.existData(ctx.scene.state[this.data[ctx.wizard.cursor]]);
+    const textTop = this.topTextLine(
+      ctx,
+      'Необходимо отправить фото или видео',
+    );
+    const textDown = `<b>Фото или видео</b>\n<i>Важно: вся передняя панель, мультимедия, если получается фото версии прошивки, фото снаружи</i>\n(иногда важно для редких модификаций)`;
+
+    const keyboard = [
+      [
+        { text: 'Редактировать', callback_data: 'edit' },
+        { text: 'Отмена', callback_data: 'leaveScene' },
+      ],
+    ];
+
+    if (data) {
+      keyboard[0].push({ text: 'Далее', callback_data: 'nextStep' });
+    }
+
+    const media: MediaItem[] =
+      'media' in ctx.scene.state
+        ? (ctx.scene.state['media'] as MediaItem[])
+        : [];
+
+    await this.botMessage.sendTopDownMessage(
+      ctx.user,
+      ctx.app,
+      textTop,
+      textDown,
+      media,
+      keyboard,
+    );
+    ctx.wizard.next();
+  }
+
+  @WizardStep(8)
+  async step8(@Ctx() ctx: MyWizardContext) {
     if (await this.control(ctx)) return;
 
     if (await this.saveMediaAlbum(ctx, 'media')) return;

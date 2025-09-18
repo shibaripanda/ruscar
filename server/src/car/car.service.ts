@@ -18,6 +18,20 @@ export class CarService {
     console.log('CarService initialized');
   }
 
+  async getInfoAboutCars(data: string, filter: {[key: string]: string}) {
+    const carsData = await this.carModel.find(filter, {[data]: 1, _id: 0})
+    const freq: Record<string, number> = carsData.reduce((acc, item) => {
+      acc[item[data]] = (acc[item[data]] || 0) + 1;
+      return acc;
+    }, {});
+    const sorted: string[] = Object.entries(freq)
+      .sort((a, b) => b[1] - a[1]) 
+      .map(([marka]) => marka)
+      .slice(0, 10);
+    return sorted;
+
+  }
+
   async statusCar(_id: string, status: StatusCar, tId: number): Promise<CarDocument | null> {
     return await this.carModel.findOneAndUpdate({ _id: _id }, {status: status, $push: {
           dataHistoryLine: { tId, text: `Статус изменен на "${status}"`, date: Date.now() },
@@ -80,7 +94,7 @@ export class CarService {
 
   showCarForUser(car: CarDocument) {
     return {
-      showText: `<b>Запрос: ${car.order}</b>\n🚘▫️▫️▫️▫️▫️▫️▫️▫️\n<b>${car.marka} ${car.model} ${car.age}</b>\n${car.vin}\n${car.info}`,
+      showText: `<b>Запрос: ${car.order}</b>\n🚘▫️▫️▫️▫️▫️▫️▫️▫️\n<b>${car.marka} ${car.model} ${car.age}</b>\n${car.vin}\n${car.info}\n${car.contact}`,
       showMedia: car.media,
     };
   }

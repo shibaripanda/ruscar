@@ -46,9 +46,12 @@ export function AcordPanel({car, addHistory, deleteCar, statusCar} : CarAcordPan
 
    return (
     <Accordion.Panel>
+        <Space h='sm'/>
         {car.vin}
         <Space h='sm'/>
         {car.info}
+        <Space h='sm'/>
+        {car.contact ? car.contact : ''}
         <Divider my="md" />
         <Group justify="space-between">
           <Group>

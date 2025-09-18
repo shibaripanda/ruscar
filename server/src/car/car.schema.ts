@@ -26,6 +26,9 @@ export class Car {
   age: string;
 
   @Prop()
+  contact: string;
+
+  @Prop()
   vin: string;
 
   @Prop()

@@ -6,6 +6,7 @@ export interface Car {
     model: string;
     age: string;
     vin: string;
+    contact: string;
     info: string;
     deleted: boolean;
     dateForWork: Date;
